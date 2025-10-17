@@ -1,0 +1,8 @@
+{
+  "name": "cms-frontend",
+  "version": "1.0.0",
+  "description": "The frontend for the CMS.",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  }
+}
