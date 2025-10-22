@@ -52,6 +52,22 @@ apiRouter.post('/images', (req, res) => {
     });
 });
 
+apiRouter.post('/sessions', (req, res) => {
+  const { image1, image2, image3 } = req.body;
+  if (!image1 || !image2 || !image3) {
+    return res.status(400).send({ message: 'Three images are required' });
+  }
+
+  const newSessionRef = db.ref('images/sessions').push();
+  newSessionRef.set({ image1, image2, image3 })
+    .then(() => {
+      res.status(201).send({ message: 'Session saved successfully' });
+    })
+    .catch((error) => {
+      res.status(500).send({ message: 'Error saving session', error });
+    });
+});
+
 app.use('/api', apiRouter);
 
 // Endpoint to serve Firebase config

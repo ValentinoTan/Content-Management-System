@@ -13,6 +13,7 @@
 
 # Logs
 /server.log
+/node_output.log
 
 # Environment
 /backend/.env
