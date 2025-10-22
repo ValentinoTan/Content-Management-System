@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('/firebase-config')
+  fetch('http://localhost:3000/firebase-config')
     .then(response => response.json())
     .then(firebaseConfig => {
       // Initialize Firebase
@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const loadImages = () => {
-        fetch('/api/images')
+        fetch('http://localhost:3000/api/images')
           .then(response => response.json())
           .then(images => {
             imageGallery.innerHTML = '';
@@ -50,7 +50,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const loadImagesForConfiguration = () => {
-        fetch('/api/images')
+        fetch('http://localhost:3000/api/images')
           .then(response => response.json())
           .then(images => {
             configureImageGallery.innerHTML = '';
@@ -88,11 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
           (error) => console.error('Upload failed:', error),
           () => {
             task.snapshot.ref.getDownloadURL().then((downloadURL) => {
-              fetch('/api/images', {
+              fetch('http://localhost:3000/api/images', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: downloadURL }),
-              }).then(() => loadImages());
+              }).then(() => location.reload());
             });
           }
         );
@@ -113,11 +113,21 @@ document.addEventListener('DOMContentLoaded', () => {
           image3: selectedImages[2],
         };
 
-        fetch('/api/sessions', {
+        fetch('http://localhost:3000/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(sessionData),
-        }).then(() => alert('Configuration saved!'));
+        }).then(() => location.reload());
+      });
+
+      configureImageGallery.addEventListener('click', (event) => {
+        if (event.target.matches('input[type="checkbox"]')) {
+            const checkedCount = configureImageGallery.querySelectorAll('input[type="checkbox"]:checked').length;
+            if (checkedCount > 3) {
+                event.target.checked = false;
+                alert('You can select a maximum of 3 images.');
+            }
+        }
       });
 
       // Initial load

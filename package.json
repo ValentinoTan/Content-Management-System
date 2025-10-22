@@ -17,5 +17,9 @@
   "bugs": {
     "url": "https://github.com/ValentinoTan/Content-Management-System/issues"
   },
-  "homepage": "https://github.com/ValentinoTan/Content-Management-System#readme"
+  "homepage": "https://github.com/ValentinoTan/Content-Management-System#readme",
+  "dependencies": {
+    "@playwright/test": "^1.56.1",
+    "playwright": "^1.56.1"
+  }
 }
