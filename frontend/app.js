@@ -23,30 +23,42 @@ document.addEventListener('DOMContentLoaded', () => {
       const createSessionBtn = document.getElementById('create-session-btn');
       const saveSessionBtn = document.getElementById('save-session-btn');
       const cancelSessionBtn = document.getElementById('cancel-session-btn');
+      const closeModalBtn = document.getElementById('close-modal-btn');
 
-      // Galleries and Lists
+      // Galleries, Lists, and Placeholders
       const imageGallery = document.getElementById('imageGallery');
-      const imageSelectionGallery = document.getElementById('image-selection-gallery');
       const sessionsList = document.getElementById('sessions-list');
       const imageDescriptionFields = document.getElementById('image-description-fields');
+      const imagePlaceholders = document.querySelectorAll('.image-placeholder');
+
+      // Modal
+      const imageSelectionModal = document.getElementById('image-selection-modal');
+      const modalImageGallery = document.getElementById('modal-image-gallery');
 
       // Inputs
       const imageInput = document.getElementById('imageInput');
       const sessionNameInput = document.getElementById('session-name-input');
 
+      let currentPlaceholderId = null;
+
       const resetCreateSessionForm = () => {
         sessionNameInput.value = '';
         imageDescriptionFields.innerHTML = '';
-        const selectedImages = imageSelectionGallery.querySelectorAll('.border-blue-500');
-        selectedImages.forEach(img => {
-          img.classList.remove('border-4', 'border-blue-500');
+        imagePlaceholders.forEach(placeholder => {
+          placeholder.innerHTML = `<button class="select-image-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">Select Image</button>`;
+          delete placeholder.dataset.imageUrl;
+          delete placeholder.dataset.imageId;
         });
+        addPlaceholderEventListeners();
       };
 
       const showView = (view) => {
         [uploadView, dashboardView, sessionsView, createSessionView].forEach(v => v.classList.add('hidden'));
         view.classList.remove('hidden');
       };
+
+      const openModal = () => imageSelectionModal.classList.remove('hidden');
+      const closeModal = () => imageSelectionModal.classList.add('hidden');
 
       uploadLink.addEventListener('click', () => showView(uploadView));
       dashboardLink.addEventListener('click', () => showView(dashboardView));
@@ -57,13 +69,24 @@ document.addEventListener('DOMContentLoaded', () => {
       createSessionBtn.addEventListener('click', () => {
         resetCreateSessionForm();
         showView(createSessionView);
-        loadImagesForSelection();
+        loadImagesForModal();
       });
 
       cancelSessionBtn.addEventListener('click', () => {
         resetCreateSessionForm();
         showView(sessionsView);
       });
+
+      closeModalBtn.addEventListener('click', closeModal);
+
+      const addPlaceholderEventListeners = () => {
+        document.querySelectorAll('.select-image-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            currentPlaceholderId = e.target.parentElement.dataset.placeholderId;
+            openModal();
+          });
+        });
+      };
 
       const loadImages = () => {
         fetch('http://localhost:3000/api/images')
@@ -81,27 +104,49 @@ document.addEventListener('DOMContentLoaded', () => {
           });
       };
 
-      const loadImagesForSelection = () => {
+      const loadImagesForModal = () => {
         fetch('http://localhost:3000/api/images')
           .then(response => response.json())
           .then(images => {
-            imageSelectionGallery.innerHTML = '';
+            modalImageGallery.innerHTML = '';
             if (images) {
               Object.keys(images).forEach(key => {
                 const image = images[key];
-                const container = document.createElement('div');
-                container.classList.add('relative');
                 const imgElement = document.createElement('img');
                 imgElement.src = image.url;
-                imgElement.classList.add('w-full', 'h-auto', 'rounded-lg', 'cursor-pointer');
+                imgElement.classList.add('w-full', 'h-auto', 'rounded-lg', 'cursor-pointer', 'hover:opacity-75');
                 imgElement.dataset.imageId = key;
                 imgElement.dataset.imageUrl = image.url;
-                container.appendChild(imgElement);
-                imageSelectionGallery.appendChild(container);
+                modalImageGallery.appendChild(imgElement);
               });
             }
           });
       };
+
+      modalImageGallery.addEventListener('click', (e) => {
+        if (e.target.tagName === 'IMG') {
+          const imageUrl = e.target.dataset.imageUrl;
+          const imageId = e.target.dataset.imageId;
+          const placeholder = document.querySelector(`[data-placeholder-id='${currentPlaceholderId}']`);
+
+          placeholder.innerHTML = `<img src="${imageUrl}" class="w-full h-auto rounded-lg">`;
+          placeholder.dataset.imageUrl = imageUrl;
+          placeholder.dataset.imageId = imageId;
+
+          const existingField = document.getElementById(`desc-div-${currentPlaceholderId}`);
+          if (existingField) existingField.remove();
+
+          const descriptionField = document.createElement('div');
+          descriptionField.id = `desc-div-${currentPlaceholderId}`;
+          descriptionField.innerHTML = `
+            <label for="desc-input-${currentPlaceholderId}" class="block text-gray-700 text-sm font-bold mt-2 mb-1">Description for ${currentPlaceholderId}:</label>
+            <input type="text" id="desc-input-${currentPlaceholderId}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+          `;
+          imageDescriptionFields.appendChild(descriptionField);
+
+          closeModal();
+        }
+      });
 
       const loadSessions = () => {
         fetch('http://localhost:3000/api/sessions')
@@ -122,32 +167,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
           });
       };
-
-      imageSelectionGallery.addEventListener('click', (event) => {
-        if (event.target.tagName === 'IMG') {
-          const selectedCount = imageSelectionGallery.querySelectorAll('.border-blue-500').length;
-          if (event.target.classList.contains('border-blue-500')) {
-            event.target.classList.remove('border-4', 'border-blue-500');
-            const field = document.getElementById(`desc-${event.target.dataset.imageId}`);
-            if (field) {
-              field.remove();
-            }
-          } else {
-            if (selectedCount < 3) {
-              event.target.classList.add('border-4', 'border-blue-500');
-              const descriptionField = document.createElement('div');
-              descriptionField.id = `desc-${event.target.dataset.imageId}`;
-              descriptionField.innerHTML = `
-                <label for="desc-input-${event.target.dataset.imageId}" class="block text-gray-700 text-sm font-bold mt-2 mb-1">Description for ${event.target.src.substring(event.target.src.lastIndexOf('/') + 1)}:</label>
-                <input type="text" id="desc-input-${event.target.dataset.imageId}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline" data-image-id="${event.target.dataset.imageId}">
-              `;
-              imageDescriptionFields.appendChild(descriptionField);
-            } else {
-              alert('You can select a maximum of 3 images.');
-            }
-          }
-        }
-      });
 
       uploadButton.addEventListener('click', () => {
         const file = imageInput.files[0];
@@ -171,26 +190,37 @@ document.addEventListener('DOMContentLoaded', () => {
 
       saveSessionBtn.addEventListener('click', () => {
         const sessionName = sessionNameInput.value;
-        const selectedImages = Array.from(imageSelectionGallery.querySelectorAll('.border-blue-500'));
-
         if (!sessionName) {
           alert('Please enter a session name.');
           return;
         }
 
-        if (selectedImages.length !== 3) {
-          alert('Please select exactly 3 images.');
+        let allPlaceholdersFilled = true;
+        const imagesData = { home_screen: [], game_over_screen: null };
+
+        imagePlaceholders.forEach(placeholder => {
+          const placeholderId = placeholder.dataset.placeholderId;
+          if (!placeholder.dataset.imageUrl) {
+            allPlaceholdersFilled = false;
+          } else {
+            const descriptionInput = document.getElementById(`desc-input-${placeholderId}`);
+            const imageData = {
+              url: placeholder.dataset.imageUrl,
+              description: descriptionInput ? descriptionInput.value : '',
+            };
+
+            if (placeholderId.startsWith('home-')) {
+              imagesData.home_screen.push(imageData);
+            } else if (placeholderId === 'game-over') {
+              imagesData.game_over_screen = imageData;
+            }
+          }
+        });
+
+        if (!allPlaceholdersFilled) {
+          alert('Please select an image for every placeholder.');
           return;
         }
-
-        const imagesData = selectedImages.map(img => {
-          const imageId = img.dataset.imageId;
-          const descriptionInput = document.getElementById(`desc-input-${imageId}`);
-          return {
-            url: img.dataset.imageUrl,
-            description: descriptionInput ? descriptionInput.value : '',
-          };
-        });
 
         const sessionData = {
           sessionName,
@@ -211,5 +241,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Initial load
       showView(uploadView);
       loadImages();
+      addPlaceholderEventListeners();
     });
 });

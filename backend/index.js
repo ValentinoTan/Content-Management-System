@@ -56,25 +56,19 @@ apiRouter.post('/images', (req, res) => {
 
 apiRouter.post('/sessions', (req, res) => {
   const { sessionName, images } = req.body;
-  if (!sessionName || !images || images.length !== 3) {
-    return res.status(400).send({ message: 'Session name and exactly 3 images are required' });
+  if (!sessionName || !images || !images.home_screen || !images.game_over_screen || images.home_screen.length !== 3) {
+    return res.status(400).send({ message: 'Session name, 3 home screen images, and 1 game over screen image are required' });
   }
 
   const newSessionRef = db.ref('sessions').push();
   const newSession = {
     sessionName,
     createdAt: new Date().toISOString(),
-    images: {},
+    images: {
+      home_screen: images.home_screen.map(img => ({ ...img, clickCount: 0 })),
+      game_over_screen: { ...images.game_over_screen, clickCount: 0 }
+    },
   };
-
-  images.forEach(image => {
-    const imageId = db.ref('sessions').child(newSessionRef.key).child('images').push().key;
-    newSession.images[imageId] = {
-      url: image.url,
-      description: image.description,
-      clickCount: 0,
-    };
-  });
 
   newSessionRef.set(newSession)
     .then(() => {
