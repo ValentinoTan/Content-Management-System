@@ -34,6 +34,10 @@ document.addEventListener('DOMContentLoaded', () => {
       // Modal
       const imageSelectionModal = document.getElementById('image-selection-modal');
       const modalImageGallery = document.getElementById('modal-image-gallery');
+      const sessionDetailsModal = document.getElementById('session-details-modal');
+      const detailsModalTitle = document.getElementById('details-modal-title');
+      const detailsModalContent = document.getElementById('details-modal-content');
+      const closeDetailsModalBtn = document.getElementById('close-details-modal-btn');
 
       // Inputs
       const imageInput = document.getElementById('imageInput');
@@ -48,8 +52,10 @@ document.addEventListener('DOMContentLoaded', () => {
           placeholder.innerHTML = `<button class="select-image-btn bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">Select Image</button>`;
           delete placeholder.dataset.imageUrl;
           delete placeholder.dataset.imageId;
+          const changeBtn = document.querySelector(`.change-image-btn[data-placeholder-id='${placeholder.dataset.placeholderId}']`);
+          if (changeBtn) changeBtn.classList.add('hidden');
         });
-        addPlaceholderEventListeners();
+        attachPlaceholderEventListeners();
       };
 
       const showView = (view) => {
@@ -57,7 +63,10 @@ document.addEventListener('DOMContentLoaded', () => {
         view.classList.remove('hidden');
       };
 
-      const openModal = () => imageSelectionModal.classList.remove('hidden');
+      const openModal = (placeholderId) => {
+        currentPlaceholderId = placeholderId;
+        imageSelectionModal.classList.remove('hidden');
+      };
       const closeModal = () => imageSelectionModal.classList.add('hidden');
 
       uploadLink.addEventListener('click', () => showView(uploadView));
@@ -79,12 +88,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
       closeModalBtn.addEventListener('click', closeModal);
 
-      const addPlaceholderEventListeners = () => {
-        document.querySelectorAll('.select-image-btn').forEach(btn => {
-          btn.addEventListener('click', (e) => {
-            currentPlaceholderId = e.target.parentElement.dataset.placeholderId;
-            openModal();
-          });
+      const attachPlaceholderEventListeners = () => {
+        document.querySelectorAll('.select-image-btn, .change-image-btn').forEach(btn => {
+            btn.onclick = (e) => {
+                openModal(e.target.dataset.placeholderId || e.target.parentElement.dataset.placeholderId);
+            };
         });
       };
 
@@ -129,9 +137,12 @@ document.addEventListener('DOMContentLoaded', () => {
           const imageId = e.target.dataset.imageId;
           const placeholder = document.querySelector(`[data-placeholder-id='${currentPlaceholderId}']`);
 
-          placeholder.innerHTML = `<img src="${imageUrl}" class="w-full h-auto rounded-lg">`;
+          placeholder.innerHTML = `<img src="${imageUrl}" class="rounded-lg" style="width: 200px; height: 250px; object-fit: cover;">`;
           placeholder.dataset.imageUrl = imageUrl;
           placeholder.dataset.imageId = imageId;
+
+          const changeBtn = document.querySelector(`.change-image-btn[data-placeholder-id='${currentPlaceholderId}']`);
+          if (changeBtn) changeBtn.classList.remove('hidden');
 
           const existingField = document.getElementById(`desc-div-${currentPlaceholderId}`);
           if (existingField) existingField.remove();
@@ -157,16 +168,44 @@ document.addEventListener('DOMContentLoaded', () => {
               Object.keys(sessions).forEach(sessionId => {
                 const session = sessions[sessionId];
                 const sessionElement = document.createElement('div');
-                sessionElement.classList.add('p-4', 'border', 'rounded-lg', 'mb-4');
+                sessionElement.classList.add('p-4', 'border', 'rounded-lg', 'mb-4', 'flex', 'justify-between', 'items-center');
                 sessionElement.innerHTML = `
-                  <h3 class="text-xl font-bold">${session.sessionName}</h3>
-                  <p class="text-sm text-gray-500">Created at: ${new Date(session.createdAt).toLocaleString()}</p>
+                  <div>
+                    <h3 class="text-xl font-bold">${session.sessionName}</h3>
+                    <p class="text-sm text-gray-500">Created at: ${new Date(session.createdAt).toLocaleString()}</p>
+                  </div>
+                  <button class="details-btn bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" data-session-id="${sessionId}">Details</button>
                 `;
                 sessionsList.appendChild(sessionElement);
               });
             }
           });
       };
+
+      sessionsList.addEventListener('click', (e) => {
+        if (e.target.classList.contains('details-btn')) {
+          const sessionId = e.target.dataset.sessionId;
+          fetch('http://localhost:3000/api/sessions')
+            .then(response => response.json())
+            .then(sessions => {
+              const session = sessions[sessionId];
+              let totalClicks = 0;
+              if (session.images.home_screen) {
+                totalClicks += session.images.home_screen.reduce((acc, img) => acc + (img.clickCount || 0), 0);
+              }
+              if (session.images.game_over_screen) {
+                totalClicks += session.images.game_over_screen.clickCount || 0;
+              }
+              detailsModalTitle.textContent = `Details for ${session.sessionName}`;
+              detailsModalContent.innerHTML = `<p class="text-2xl">${totalClicks}</p><p>Total Clicks</p>`;
+              sessionDetailsModal.classList.remove('hidden');
+            });
+        }
+      });
+
+      closeDetailsModalBtn.addEventListener('click', () => {
+        sessionDetailsModal.classList.add('hidden');
+      });
 
       uploadButton.addEventListener('click', () => {
         const file = imageInput.files[0];
@@ -241,6 +280,6 @@ document.addEventListener('DOMContentLoaded', () => {
       // Initial load
       showView(uploadView);
       loadImages();
-      addPlaceholderEventListeners();
+      attachPlaceholderEventListeners();
     });
 });
