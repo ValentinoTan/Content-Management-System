@@ -34,6 +34,15 @@ document.addEventListener('DOMContentLoaded', () => {
       const imageInput = document.getElementById('imageInput');
       const sessionNameInput = document.getElementById('session-name-input');
 
+      const resetCreateSessionForm = () => {
+        sessionNameInput.value = '';
+        imageDescriptionFields.innerHTML = '';
+        const selectedImages = imageSelectionGallery.querySelectorAll('.border-blue-500');
+        selectedImages.forEach(img => {
+          img.classList.remove('border-4', 'border-blue-500');
+        });
+      };
+
       const showView = (view) => {
         [uploadView, dashboardView, sessionsView, createSessionView].forEach(v => v.classList.add('hidden'));
         view.classList.remove('hidden');
@@ -46,10 +55,15 @@ document.addEventListener('DOMContentLoaded', () => {
         loadSessions();
       });
       createSessionBtn.addEventListener('click', () => {
+        resetCreateSessionForm();
         showView(createSessionView);
         loadImagesForSelection();
       });
-      cancelSessionBtn.addEventListener('click', () => showView(sessionsView));
+
+      cancelSessionBtn.addEventListener('click', () => {
+        resetCreateSessionForm();
+        showView(sessionsView);
+      });
 
       const loadImages = () => {
         fetch('http://localhost:3000/api/images')
@@ -188,6 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(sessionData),
         }).then(() => {
+          resetCreateSessionForm();
           showView(sessionsView);
           loadSessions();
         });
