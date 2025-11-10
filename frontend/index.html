@@ -15,7 +15,7 @@
     <nav>
       <a href="#" id="upload-link" class="block py-2 px-4 rounded hover:bg-gray-700">Upload Image</a>
       <a href="#" id="dashboard-link" class="block py-2 px-4 rounded hover:bg-gray-700">Dashboard</a>
-      <a href="#" id="configure-link" class="block py-2 px-4 rounded hover:bg-gray-700">Configure Image</a>
+      <a href="#" id="sessions-link" class="block py-2 px-4 rounded hover:bg-gray-700">Sessions</a>
     </nav>
   </div>
 
@@ -54,13 +54,34 @@
       </div>
     </div>
 
-    <div id="configure-view" class="hidden">
-      <h2 class="text-2xl font-semibold mb-2">Configure Image</h2>
-      <div id="configureImageGallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-        <!-- Checkbox-enabled images will be loaded here -->
+    <div id="sessions-view" class="hidden">
+      <h2 class="text-2xl font-semibold mb-2">Sessions</h2>
+      <button id="create-session-btn" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded mb-4">
+        Create New Session
+      </button>
+      <div id="sessions-list">
+        <!-- Sessions will be listed here -->
       </div>
-      <button id="submitConfiguration" class="mt-4 bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
-        Submit Configuration
+    </div>
+
+    <div id="create-session-view" class="hidden">
+      <h2 class="text-2xl font-semibold mb-2">Create New Session</h2>
+      <div class="mb-4">
+        <label for="session-name-input" class="block text-gray-700 text-sm font-bold mb-2">Session Name:</label>
+        <input type="text" id="session-name-input" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+      </div>
+      <h3 class="text-xl font-semibold mb-2">Select 3 Images</h3>
+      <div id="image-selection-gallery" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 mb-4">
+        <!-- Images for selection will be loaded here -->
+      </div>
+      <div id="image-description-fields">
+        <!-- Description fields for selected images will be added here -->
+      </div>
+      <button id="save-session-btn" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+        Save Session
+      </button>
+      <button id="cancel-session-btn" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+        Cancel
       </button>
     </div>
   </div>

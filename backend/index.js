@@ -55,18 +55,43 @@ apiRouter.post('/images', (req, res) => {
 });
 
 apiRouter.post('/sessions', (req, res) => {
-  const { image1, image2, image3 } = req.body;
-  if (!image1 || !image2 || !image3) {
-    return res.status(400).send({ message: 'Three images are required' });
+  const { sessionName, images } = req.body;
+  if (!sessionName || !images || images.length !== 3) {
+    return res.status(400).send({ message: 'Session name and exactly 3 images are required' });
   }
 
   const newSessionRef = db.ref('sessions').push();
-  newSessionRef.set({ image1, image2, image3 })
+  const newSession = {
+    sessionName,
+    createdAt: new Date().toISOString(),
+    images: {},
+  };
+
+  images.forEach(image => {
+    const imageId = db.ref('sessions').child(newSessionRef.key).child('images').push().key;
+    newSession.images[imageId] = {
+      url: image.url,
+      description: image.description,
+      clickCount: 0,
+    };
+  });
+
+  newSessionRef.set(newSession)
     .then(() => {
-      res.status(201).send({ message: 'Session saved successfully' });
+      res.status(201).send({ message: 'Session saved successfully', sessionId: newSessionRef.key });
     })
     .catch((error) => {
       res.status(500).send({ message: 'Error saving session', error });
+    });
+});
+
+apiRouter.get('/sessions', (req, res) => {
+  db.ref('sessions').once('value')
+    .then((snapshot) => {
+      res.status(200).send(snapshot.val());
+    })
+    .catch((error) => {
+      res.status(500).send({ message: 'Error fetching sessions', error });
     });
 });
 
