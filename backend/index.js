@@ -60,7 +60,7 @@ apiRouter.post('/sessions', (req, res) => {
     return res.status(400).send({ message: 'Three images are required' });
   }
 
-  const newSessionRef = db.ref('images/sessions').push();
+  const newSessionRef = db.ref('sessions').push();
   newSessionRef.set({ image1, image2, image3 })
     .then(() => {
       res.status(201).send({ message: 'Session saved successfully' });
