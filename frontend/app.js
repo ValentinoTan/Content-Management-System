@@ -368,7 +368,11 @@ document.addEventListener('DOMContentLoaded', () => {
               borderWidth: 1
             }]
           },
-          options: { scales: { y: { beginAtZero: true } } }
+          options: {
+            scales: { y: { beginAtZero: true } },
+            responsive: true,
+            maintainAspectRatio: false
+          }
         });
       };
 
@@ -396,7 +400,11 @@ document.addEventListener('DOMContentLoaded', () => {
               borderWidth: 1
             }]
           },
-          options: { scales: { y: { beginAtZero: true } } }
+          options: {
+            scales: { y: { beginAtZero: true } },
+            responsive: true,
+            maintainAspectRatio: false
+          }
         });
       };
 
@@ -430,6 +438,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     ],
                     borderWidth: 1
                 }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false
             }
         });
     };
