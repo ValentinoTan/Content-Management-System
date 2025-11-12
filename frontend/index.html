@@ -42,14 +42,44 @@
 
     <div id="dashboard-view" class="hidden">
       <h2 class="text-2xl font-semibold mb-2">Dashboard</h2>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
         <div class="bg-white p-4 rounded-lg shadow">
           <h3 class="text-lg font-semibold">Total Players</h3>
-          <p class="text-3xl">--</p>
+          <p id="total-players" class="text-3xl">--</p>
         </div>
         <div class="bg-white p-4 rounded-lg shadow">
           <h3 class="text-lg font-semibold">Player Return Rate</h3>
-          <p class="text-3xl">--%</p>
+          <p id="return-rate" class="text-3xl">--%</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="text-lg font-semibold">Total Plays</h3>
+          <p id="total-plays" class="text-3xl">--</p>
+        </div>
+      </div>
+      <div class="mt-8">
+        <h3 class="text-xl font-semibold mb-4">Player Data</h3>
+        <table class="min-w-full bg-white">
+          <thead class="bg-gray-800 text-white">
+            <tr>
+              <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">Player Name</th>
+              <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">Phone Number</th>
+              <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">School Name</th>
+              <th class="text-left py-3 px-4 uppercase font-semibold text-sm">High Score</th>
+              <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Play Count</th>
+            </tr>
+          </thead>
+          <tbody id="player-data-table" class="text-gray-700">
+            <!-- Player data will be inserted here -->
+          </tbody>
+        </table>
+        <div class="mt-4 flex justify-between">
+          <button id="prev-page-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-l">
+            Prev
+          </button>
+          <span id="page-indicator" class="py-2 px-4">Page 1 of 1</span>
+          <button id="next-page-btn" class="bg-gray-300 hover:bg-gray-400 text-gray-800 font-bold py-2 px-4 rounded-r">
+            Next
+          </button>
         </div>
       </div>
     </div>

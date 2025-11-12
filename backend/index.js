@@ -89,6 +89,65 @@ apiRouter.get('/sessions', (req, res) => {
     });
 });
 
+apiRouter.get('/player-analytics', async (req, res) => {
+  try {
+    const jungleJumperRef = db.ref('Jungle Jumper');
+    const sandsOfCairoRef = db.ref('Sands of Cairo');
+
+    const [jungleJumperSnapshot, sandsOfCairoSnapshot] = await Promise.all([
+      jungleJumperRef.once('value'),
+      sandsOfCairoRef.once('value'),
+    ]);
+
+    const allPlays = [];
+    if (jungleJumperSnapshot.exists()) {
+      jungleJumperSnapshot.forEach(child => {
+        allPlays.push(child.val());
+      });
+    }
+    if (sandsOfCairoSnapshot.exists()) {
+      sandsOfCairoSnapshot.forEach(child => {
+        allPlays.push(child.val());
+      });
+    }
+
+    const totalPlays = allPlays.length;
+
+    const uniquePlayers = {};
+    allPlays.forEach(play => {
+      if (!uniquePlayers[play.phoneNumber]) {
+        uniquePlayers[play.phoneNumber] = { ...play, playCount: 0 };
+      }
+      uniquePlayers[play.phoneNumber].playCount += 1;
+      if (play.playerScore > (uniquePlayers[play.phoneNumber].playerScore || 0)) {
+        uniquePlayers[play.phoneNumber].playerScore = play.playerScore;
+      }
+    });
+
+    const totalUniquePlayers = Object.keys(uniquePlayers).length;
+
+    let returningPlayers = 0;
+    Object.values(uniquePlayers).forEach(player => {
+      if (player.playCount > 1) {
+        returningPlayers += 1;
+      }
+    });
+
+    const returnRate = totalUniquePlayers > 0 ? (returningPlayers / totalUniquePlayers) * 100 : 0;
+
+    res.status(200).send({
+      totalPlays,
+      totalUniquePlayers,
+      returnRate: returnRate.toFixed(2),
+      players: Object.values(uniquePlayers)
+    });
+
+  } catch (error) {
+    res.status(500).send({ message: 'Error fetching player analytics', error: error.message });
+  }
+});
+
+
 app.use('/api', apiRouter);
 
 // Endpoint to serve Firebase config

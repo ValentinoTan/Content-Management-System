@@ -70,7 +70,6 @@ document.addEventListener('DOMContentLoaded', () => {
       const closeModal = () => imageSelectionModal.classList.add('hidden');
 
       uploadLink.addEventListener('click', () => showView(uploadView));
-      dashboardLink.addEventListener('click', () => showView(dashboardView));
       sessionsLink.addEventListener('click', () => {
         showView(sessionsView);
         loadSessions();
@@ -275,6 +274,81 @@ document.addEventListener('DOMContentLoaded', () => {
           showView(sessionsView);
           loadSessions();
         });
+      });
+
+      // Dashboard Elements
+      const totalPlayersEl = document.getElementById('total-players');
+      const returnRateEl = document.getElementById('return-rate');
+      const totalPlaysEl = document.getElementById('total-plays');
+      const playerDataTable = document.getElementById('player-data-table');
+      const prevPageBtn = document.getElementById('prev-page-btn');
+      const nextPageBtn = document.getElementById('next-page-btn');
+      const pageIndicator = document.getElementById('page-indicator');
+
+      let allPlayers = [];
+      let currentPage = 1;
+      const rowsPerPage = 20;
+
+      const displayPlayerPage = (page) => {
+        playerDataTable.innerHTML = '';
+        const start = (page - 1) * rowsPerPage;
+        const end = start + rowsPerPage;
+        const paginatedPlayers = allPlayers.slice(start, end);
+
+        for (const player of paginatedPlayers) {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td class="text-left py-3 px-4">${player.playerName}</td>
+            <td class="text-left py-3 px-4">${player.phoneNumber}</td>
+            <td class="text-left py-3 px-4">${player.schoolName}</td>
+            <td class="text-left py-3 px-4">${player.playerScore}</td>
+            <td class="text-left py-3 px-4">${player.playCount}</td>
+          `;
+          playerDataTable.appendChild(row);
+        }
+      };
+
+      const updatePaginationControls = () => {
+        const totalPages = Math.ceil(allPlayers.length / rowsPerPage);
+        pageIndicator.textContent = `Page ${currentPage} of ${totalPages || 1}`;
+        prevPageBtn.disabled = currentPage === 1;
+        nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
+      };
+
+      const loadPlayerAnalytics = () => {
+        fetch('http://localhost:3000/api/player-analytics')
+          .then(response => response.json())
+          .then(data => {
+            totalPlayersEl.textContent = data.totalUniquePlayers;
+            returnRateEl.textContent = `${data.returnRate}%`;
+            totalPlaysEl.textContent = data.totalPlays;
+            allPlayers = data.players;
+            currentPage = 1;
+            displayPlayerPage(currentPage);
+            updatePaginationControls();
+          });
+      };
+
+      prevPageBtn.addEventListener('click', () => {
+        if (currentPage > 1) {
+          currentPage--;
+          displayPlayerPage(currentPage);
+          updatePaginationControls();
+        }
+      });
+
+      nextPageBtn.addEventListener('click', () => {
+        const totalPages = Math.ceil(allPlayers.length / rowsPerPage);
+        if (currentPage < totalPages) {
+          currentPage++;
+          displayPlayerPage(currentPage);
+          updatePaginationControls();
+        }
+      });
+
+      dashboardLink.addEventListener('click', () => {
+        showView(dashboardView);
+        loadPlayerAnalytics();
       });
 
       // Initial load
