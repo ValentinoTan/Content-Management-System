@@ -280,6 +280,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const totalPlayersEl = document.getElementById('total-players');
       const returnRateEl = document.getElementById('return-rate');
       const totalPlaysEl = document.getElementById('total-plays');
+      const averagePlaysEl = document.getElementById('average-plays');
+      const highestPlayCountEl = document.getElementById('highest-play-count');
       const playerDataTable = document.getElementById('player-data-table');
       const prevPageBtn = document.getElementById('prev-page-btn');
       const nextPageBtn = document.getElementById('next-page-btn');
@@ -288,6 +290,8 @@ document.addEventListener('DOMContentLoaded', () => {
       let allPlayers = [];
       let currentPage = 1;
       const rowsPerPage = 20;
+      let playFrequencyChart, schoolEngagementChart, schoolDistributionChart;
+
 
       const displayPlayerPage = (page) => {
         playerDataTable.innerHTML = '';
@@ -315,19 +319,120 @@ document.addEventListener('DOMContentLoaded', () => {
         nextPageBtn.disabled = currentPage === totalPages || totalPages === 0;
       };
 
+      const destroyCharts = () => {
+          if(playFrequencyChart) playFrequencyChart.destroy();
+          if(schoolEngagementChart) schoolEngagementChart.destroy();
+          if(schoolDistributionChart) schoolDistributionChart.destroy();
+      };
+
       const loadPlayerAnalytics = () => {
         fetch('http://localhost:3000/api/player-analytics')
           .then(response => response.json())
           .then(data => {
+            destroyCharts();
+
             totalPlayersEl.textContent = data.totalUniquePlayers;
             returnRateEl.textContent = `${data.returnRate}%`;
             totalPlaysEl.textContent = data.totalPlays;
+            averagePlaysEl.textContent = data.averagePlays;
+            highestPlayCountEl.textContent = data.highestPlayCount;
+
             allPlayers = data.players;
             currentPage = 1;
             displayPlayerPage(currentPage);
             updatePaginationControls();
+
+            // Render charts
+            renderPlayFrequencyChart(data.playFrequency);
+            renderSchoolEngagementChart(data.schoolData);
+            renderSchoolDistributionChart(data.schoolData);
           });
       };
+
+      const renderPlayFrequencyChart = (playFrequency) => {
+        const ctx = document.getElementById('playFrequencyChart').getContext('2d');
+        playFrequencyChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: ['1 Play', '2-3 Plays', '4-5 Plays', '6+ Plays'],
+            datasets: [{
+              label: 'Number of Players',
+              data: [
+                playFrequency['1'],
+                playFrequency['2-3'],
+                playFrequency['4-5'],
+                playFrequency['6+']
+              ],
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+      };
+
+      const renderSchoolEngagementChart = (schoolData) => {
+        const schools = Object.keys(schoolData);
+        const uniquePlayers = schools.map(school => schoolData[school].uniquePlayers);
+        const totalPlays = schools.map(school => schoolData[school].totalPlays);
+
+        const ctx = document.getElementById('schoolEngagementChart').getContext('2d');
+        schoolEngagementChart = new Chart(ctx, {
+          type: 'bar',
+          data: {
+            labels: schools,
+            datasets: [{
+              label: 'Total Unique Players',
+              data: uniquePlayers,
+              backgroundColor: 'rgba(54, 162, 235, 0.2)',
+              borderColor: 'rgba(54, 162, 235, 1)',
+              borderWidth: 1
+            }, {
+              label: 'Total Plays',
+              data: totalPlays,
+              backgroundColor: 'rgba(75, 192, 192, 0.2)',
+              borderColor: 'rgba(75, 192, 192, 1)',
+              borderWidth: 1
+            }]
+          },
+          options: { scales: { y: { beginAtZero: true } } }
+        });
+      };
+
+      const renderSchoolDistributionChart = (schoolData) => {
+        const schools = Object.keys(schoolData);
+        const uniquePlayers = schools.map(school => schoolData[school].uniquePlayers);
+
+        const ctx = document.getElementById('schoolDistributionChart').getContext('2d');
+        schoolDistributionChart = new Chart(ctx, {
+            type: 'pie',
+            data: {
+                labels: schools,
+                datasets: [{
+                    label: 'Player Distribution',
+                    data: uniquePlayers,
+                    backgroundColor: [
+                        'rgba(255, 99, 132, 0.2)',
+                        'rgba(54, 162, 235, 0.2)',
+                        'rgba(255, 206, 86, 0.2)',
+                        'rgba(75, 192, 192, 0.2)',
+                        'rgba(153, 102, 255, 0.2)',
+                        'rgba(255, 159, 64, 0.2)'
+                    ],
+                    borderColor: [
+                        'rgba(255, 99, 132, 1)',
+                        'rgba(54, 162, 235, 1)',
+                        'rgba(255, 206, 86, 1)',
+                        'rgba(75, 192, 192, 1)',
+                        'rgba(153, 102, 255, 1)',
+                        'rgba(255, 159, 64, 1)'
+                    ],
+                    borderWidth: 1
+                }]
+            }
+        });
+    };
 
       prevPageBtn.addEventListener('click', () => {
         if (currentPage > 1) {

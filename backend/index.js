@@ -127,19 +127,48 @@ apiRouter.get('/player-analytics', async (req, res) => {
     const totalUniquePlayers = Object.keys(uniquePlayers).length;
 
     let returningPlayers = 0;
+    let highestPlayCount = 0;
     Object.values(uniquePlayers).forEach(player => {
       if (player.playCount > 1) {
         returningPlayers += 1;
       }
+      if (player.playCount > highestPlayCount) {
+        highestPlayCount = player.playCount;
+      }
     });
 
     const returnRate = totalUniquePlayers > 0 ? (returningPlayers / totalUniquePlayers) * 100 : 0;
+    const averagePlays = totalUniquePlayers > 0 ? (totalPlays / totalUniquePlayers) : 0;
+
+    // Data for Player Play Frequency Chart
+    const playFrequency = { '1': 0, '2-3': 0, '4-5': 0, '6+': 0 };
+    Object.values(uniquePlayers).forEach(player => {
+      if (player.playCount === 1) playFrequency['1']++;
+      else if (player.playCount >= 2 && player.playCount <= 3) playFrequency['2-3']++;
+      else if (player.playCount >= 4 && player.playCount <= 5) playFrequency['4-5']++;
+      else if (player.playCount >= 6) playFrequency['6+']++;
+    });
+
+    // Data for School-based charts
+    const schoolData = {};
+    Object.values(uniquePlayers).forEach(player => {
+      const school = player.schoolName || 'Unknown';
+      if (!schoolData[school]) {
+        schoolData[school] = { uniquePlayers: 0, totalPlays: 0 };
+      }
+      schoolData[school].uniquePlayers++;
+      schoolData[school].totalPlays += player.playCount;
+    });
 
     res.status(200).send({
       totalPlays,
       totalUniquePlayers,
       returnRate: returnRate.toFixed(2),
-      players: Object.values(uniquePlayers)
+      averagePlays: averagePlays.toFixed(2),
+      highestPlayCount,
+      players: Object.values(uniquePlayers),
+      playFrequency,
+      schoolData
     });
 
   } catch (error) {

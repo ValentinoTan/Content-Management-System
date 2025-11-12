@@ -7,6 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-storage.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <title>Content Management System</title>
 </head>
 <body class="flex">
@@ -42,7 +43,9 @@
 
     <div id="dashboard-view" class="hidden">
       <h2 class="text-2xl font-semibold mb-2">Dashboard</h2>
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+      <h3 class="text-xl font-semibold mb-4 border-b pb-2">Summary</h3>
+      <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
         <div class="bg-white p-4 rounded-lg shadow">
           <h3 class="text-lg font-semibold">Total Players</h3>
           <p id="total-players" class="text-3xl">--</p>
@@ -55,9 +58,34 @@
           <h3 class="text-lg font-semibold">Total Plays</h3>
           <p id="total-plays" class="text-3xl">--</p>
         </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="text-lg font-semibold">Average Plays per Player</h3>
+          <p id="average-plays" class="text-3xl">--</p>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow">
+          <h3 class="text-lg font-semibold">Highest Play Count</h3>
+          <p id="highest-play-count" class="text-3xl">--</p>
+        </div>
       </div>
+
+      <h3 class="text-xl font-semibold mt-8 mb-4 border-b pb-2">Charts</h3>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+        <div class="bg-white p-4 rounded-lg shadow col-span-1">
+          <h4 class="font-bold mb-2">Player Play Frequency</h4>
+          <canvas id="playFrequencyChart"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow col-span-2">
+          <h4 class="font-bold mb-2">Player Count vs. Total Plays by School</h4>
+          <canvas id="schoolEngagementChart"></canvas>
+        </div>
+        <div class="bg-white p-4 rounded-lg shadow col-span-3">
+          <h4 class="font-bold mb-2">Player Distribution by School</h4>
+          <div class="flex justify-center"><canvas id="schoolDistributionChart" style="max-width: 400px;"></canvas></div>
+        </div>
+      </div>
+
+      <h3 class="text-xl font-semibold mt-8 mb-4 border-b pb-2">Player Data</h3>
       <div class="mt-8">
-        <h3 class="text-xl font-semibold mb-4">Player Data</h3>
         <table class="min-w-full bg-white">
           <thead class="bg-gray-800 text-white">
             <tr>
