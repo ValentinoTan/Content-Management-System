@@ -369,7 +369,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }]
           },
           options: {
-            scales: { y: { beginAtZero: true } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 50 } } },
             responsive: true,
             maintainAspectRatio: false
           }
@@ -401,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }]
           },
           options: {
-            scales: { y: { beginAtZero: true } },
+            scales: { y: { beginAtZero: true, ticks: { stepSize: 50 } } },
             responsive: true,
             maintainAspectRatio: false
           }
