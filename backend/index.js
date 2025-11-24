@@ -3,6 +3,8 @@ const express = require('express');
 const path = require('path');
 const admin = require('firebase-admin');
 const cors = require('cors');
+const { google } = require('googleapis');
+const axios = require('axios');
 
 const app = express();
 app.use(cors());
@@ -38,20 +40,58 @@ apiRouter.get('/images', (req, res) => {
     });
 });
 
-apiRouter.post('/images', (req, res) => {
+apiRouter.post('/images', async (req, res) => {
   const { url } = req.body;
   if (!url) {
     return res.status(400).send({ message: 'URL is required' });
   }
 
-  const newImageRef = db.ref('images').push();
-  newImageRef.set({ url })
-    .then(() => {
-      res.status(201).send({ message: 'Image URL saved successfully' });
-    })
-    .catch((error) => {
-      res.status(500).send({ message: 'Error saving image URL', error });
-    });
+  try {
+    // 1. Save to Firebase Database (existing logic)
+    const newImageRef = db.ref('images').push();
+    await newImageRef.set({ url });
+
+    // 2. Upload to Google Drive (new logic)
+    const driveFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+    if (driveFolderId) {
+      try {
+        const auth = new google.auth.GoogleAuth({
+          keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+          scopes: ['https://www.googleapis.com/auth/drive.file'],
+        });
+        const drive = google.drive({ version: 'v3', auth });
+
+        // Fetch image data
+        const response = await axios({
+          url,
+          method: 'GET',
+          responseType: 'stream',
+        });
+
+        // Determine filename (e.g., from URL or generate one)
+        const filename = `image_${Date.now()}.jpg`; // Simple naming strategy
+
+        await drive.files.create({
+          requestBody: {
+            name: filename,
+            parents: [driveFolderId],
+          },
+          media: {
+            mimeType: response.headers['content-type'],
+            body: response.data,
+          },
+        });
+        console.log(`Image uploaded to Google Drive folder: ${driveFolderId}`);
+      } catch (driveError) {
+        console.error('Error uploading to Google Drive:', driveError);
+        // We do not fail the request if Drive upload fails, just log it.
+      }
+    }
+
+    res.status(201).send({ message: 'Image URL saved successfully' });
+  } catch (error) {
+    res.status(500).send({ message: 'Error saving image URL', error });
+  }
 });
 
 apiRouter.post('/sessions', (req, res) => {
