@@ -3,9 +3,6 @@ const express = require('express');
 const path = require('path');
 const admin = require('firebase-admin');
 const cors = require('cors');
-const { google } = require('googleapis');
-const axios = require('axios');
-
 const app = express();
 app.use(cors());
 const port = 3000;
@@ -50,51 +47,6 @@ apiRouter.post('/images', async (req, res) => {
     // 1. Save to Firebase Database (existing logic)
     const newImageRef = db.ref('images').push();
     await newImageRef.set({ url });
-
-    // 2. Upload to Google Drive (new logic)
-    const DEFAULT_DRIVE_FOLDER_ID = '1CxH_cJwuy8Ipt_cvhoWLWd_IESUlyxKr';
-    const driveFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID || DEFAULT_DRIVE_FOLDER_ID;
-
-    if (driveFolderId) {
-      try {
-        const auth = new google.auth.GoogleAuth({
-          keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-          scopes: ['https://www.googleapis.com/auth/drive.file'],
-        });
-        const drive = google.drive({ version: 'v3', auth });
-
-        // Fetch image data
-        const response = await axios({
-          url,
-          method: 'GET',
-          responseType: 'stream',
-        });
-
-        // Determine filename extension from content-type
-        const contentType = response.headers['content-type'];
-        let extension = 'jpg';
-        if (contentType === 'image/png') extension = 'png';
-        else if (contentType === 'image/gif') extension = 'gif';
-        else if (contentType === 'image/webp') extension = 'webp';
-
-        const filename = `image_${Date.now()}.${extension}`;
-
-        await drive.files.create({
-          requestBody: {
-            name: filename,
-            parents: [driveFolderId],
-          },
-          media: {
-            mimeType: contentType,
-            body: response.data,
-          },
-        });
-        console.log(`Image uploaded to Google Drive folder: ${driveFolderId}`);
-      } catch (driveError) {
-        console.error('Error uploading to Google Drive:', driveError);
-        // We do not fail the request if Drive upload fails, just log it.
-      }
-    }
 
     res.status(201).send({ message: 'Image URL saved successfully' });
   } catch (error) {
