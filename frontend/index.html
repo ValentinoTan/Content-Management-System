@@ -89,11 +89,11 @@
         <table class="min-w-full bg-white">
           <thead class="bg-gray-800 text-white">
             <tr>
-              <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">Player Name</th>
-              <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">Phone Number</th>
-              <th class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm">School Name</th>
-              <th class="text-left py-3 px-4 uppercase font-semibold text-sm">High Score</th>
-              <th class="text-left py-3 px-4 uppercase font-semibold text-sm">Play Count</th>
+              <th id="th-playerName" class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm cursor-pointer hover:bg-gray-700">Player Name <span id="sort-playerName"></span></th>
+              <th id="th-phoneNumber" class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm cursor-pointer hover:bg-gray-700">Phone Number <span id="sort-phoneNumber"></span></th>
+              <th id="th-schoolName" class="w-1/4 text-left py-3 px-4 uppercase font-semibold text-sm cursor-pointer hover:bg-gray-700">School Name <span id="sort-schoolName"></span></th>
+              <th id="th-playerScore" class="text-left py-3 px-4 uppercase font-semibold text-sm cursor-pointer hover:bg-gray-700">High Score <span id="sort-playerScore"></span></th>
+              <th id="th-playCount" class="text-left py-3 px-4 uppercase font-semibold text-sm cursor-pointer hover:bg-gray-700">Play Count <span id="sort-playCount"></span></th>
             </tr>
           </thead>
           <tbody id="player-data-table" class="text-gray-700">

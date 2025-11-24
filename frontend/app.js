@@ -292,6 +292,64 @@ document.addEventListener('DOMContentLoaded', () => {
       const rowsPerPage = 20;
       let playFrequencyChart, schoolEngagementChart, schoolDistributionChart;
 
+      let currentSort = {
+        column: null,
+        direction: 'asc'
+      };
+
+      const sortPlayers = (column) => {
+        if (currentSort.column === column) {
+          currentSort.direction = currentSort.direction === 'asc' ? 'desc' : 'asc';
+        } else {
+          currentSort.column = column;
+          currentSort.direction = 'asc';
+        }
+
+        allPlayers.sort((a, b) => {
+          let valA = a[column];
+          let valB = b[column];
+
+          if (column === 'playerScore' || column === 'playCount') {
+            valA = Number(valA);
+            valB = Number(valB);
+          }
+
+          if (typeof valA === 'string') {
+            valA = valA.toLowerCase();
+            valB = valB.toLowerCase();
+          }
+
+          if (valA < valB) {
+            return currentSort.direction === 'asc' ? -1 : 1;
+          }
+          if (valA > valB) {
+            return currentSort.direction === 'asc' ? 1 : -1;
+          }
+          return 0;
+        });
+
+        currentPage = 1;
+        displayPlayerPage(currentPage);
+        updatePaginationControls();
+        updateHeaderStyles();
+      };
+
+      const updateHeaderStyles = () => {
+        ['playerName', 'phoneNumber', 'schoolName', 'playerScore', 'playCount'].forEach(col => {
+          const span = document.getElementById(`sort-${col}`);
+          span.innerHTML = ''; // Clear previous icons
+          if (currentSort.column === col) {
+            span.innerHTML = currentSort.direction === 'asc' ? '&#9650;' : '&#9660;'; // Up or down arrow
+          }
+        });
+      };
+
+      document.getElementById('th-playerName').addEventListener('click', () => sortPlayers('playerName'));
+      document.getElementById('th-phoneNumber').addEventListener('click', () => sortPlayers('phoneNumber'));
+      document.getElementById('th-schoolName').addEventListener('click', () => sortPlayers('schoolName'));
+      document.getElementById('th-playerScore').addEventListener('click', () => sortPlayers('playerScore'));
+      document.getElementById('th-playCount').addEventListener('click', () => sortPlayers('playCount'));
+
 
       const displayPlayerPage = (page) => {
         playerDataTable.innerHTML = '';
