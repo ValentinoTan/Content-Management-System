@@ -57,22 +57,10 @@ apiRouter.post('/images', async (req, res) => {
 
     if (driveFolderId) {
       try {
-        let auth;
-        // Check for OAuth credentials first (preferred for personal drives)
-        if (process.env.GOOGLE_DRIVE_CLIENT_ID && process.env.GOOGLE_DRIVE_REFRESH_TOKEN) {
-          auth = new google.auth.OAuth2(
-            process.env.GOOGLE_DRIVE_CLIENT_ID,
-            process.env.GOOGLE_DRIVE_CLIENT_SECRET
-          );
-          auth.setCredentials({ refresh_token: process.env.GOOGLE_DRIVE_REFRESH_TOKEN });
-        } else {
-          // Fallback to Service Account (works for Shared Drives or Domain-Wide Delegation)
-          auth = new google.auth.GoogleAuth({
-            keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-            scopes: ['https://www.googleapis.com/auth/drive.file'],
-          });
-        }
-
+        const auth = new google.auth.GoogleAuth({
+          keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+          scopes: ['https://www.googleapis.com/auth/drive.file'],
+        });
         const drive = google.drive({ version: 'v3', auth });
 
         // Fetch image data
