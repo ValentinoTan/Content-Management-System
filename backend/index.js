@@ -52,13 +52,27 @@ apiRouter.post('/images', async (req, res) => {
     await newImageRef.set({ url });
 
     // 2. Upload to Google Drive (new logic)
-    const driveFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID;
+    const DEFAULT_DRIVE_FOLDER_ID = '1CxH_cJwuy8Ipt_cvhoWLWd_IESUlyxKr';
+    const driveFolderId = process.env.GOOGLE_DRIVE_FOLDER_ID || DEFAULT_DRIVE_FOLDER_ID;
+
     if (driveFolderId) {
       try {
-        const auth = new google.auth.GoogleAuth({
-          keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
-          scopes: ['https://www.googleapis.com/auth/drive.file'],
-        });
+        let auth;
+        // Check for OAuth credentials first (preferred for personal drives)
+        if (process.env.GOOGLE_DRIVE_CLIENT_ID && process.env.GOOGLE_DRIVE_REFRESH_TOKEN) {
+          auth = new google.auth.OAuth2(
+            process.env.GOOGLE_DRIVE_CLIENT_ID,
+            process.env.GOOGLE_DRIVE_CLIENT_SECRET
+          );
+          auth.setCredentials({ refresh_token: process.env.GOOGLE_DRIVE_REFRESH_TOKEN });
+        } else {
+          // Fallback to Service Account (works for Shared Drives or Domain-Wide Delegation)
+          auth = new google.auth.GoogleAuth({
+            keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS,
+            scopes: ['https://www.googleapis.com/auth/drive.file'],
+          });
+        }
+
         const drive = google.drive({ version: 'v3', auth });
 
         // Fetch image data
@@ -68,8 +82,14 @@ apiRouter.post('/images', async (req, res) => {
           responseType: 'stream',
         });
 
-        // Determine filename (e.g., from URL or generate one)
-        const filename = `image_${Date.now()}.jpg`; // Simple naming strategy
+        // Determine filename extension from content-type
+        const contentType = response.headers['content-type'];
+        let extension = 'jpg';
+        if (contentType === 'image/png') extension = 'png';
+        else if (contentType === 'image/gif') extension = 'gif';
+        else if (contentType === 'image/webp') extension = 'webp';
+
+        const filename = `image_${Date.now()}.${extension}`;
 
         await drive.files.create({
           requestBody: {
@@ -77,7 +97,7 @@ apiRouter.post('/images', async (req, res) => {
             parents: [driveFolderId],
           },
           media: {
-            mimeType: response.headers['content-type'],
+            mimeType: contentType,
             body: response.data,
           },
         });
