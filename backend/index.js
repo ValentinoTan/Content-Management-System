@@ -1,14 +1,26 @@
-require('dotenv').config();
-const express = require('express');
 const path = require('path');
+require('dotenv').config({ path: path.join(__dirname, '.env') });
+const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
 const app = express();
 app.use(cors());
-const port = 3000;
+const port = process.env.PORT || 3000;
 
 // Initialize Firebase Admin SDK
-const serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  try {
+    serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+  } catch (error) {
+    console.error('Error parsing FIREBASE_SERVICE_ACCOUNT:', error);
+    process.exit(1);
+  }
+} else if (process.env.GOOGLE_APPLICATION_CREDENTIALS) {
+  serviceAccount = require(process.env.GOOGLE_APPLICATION_CREDENTIALS);
+} else {
+  console.error('No service account credentials provided. Set FIREBASE_SERVICE_ACCOUNT or GOOGLE_APPLICATION_CREDENTIALS.');
+}
 
 admin.initializeApp({
   credential: admin.credential.cert(serviceAccount),
