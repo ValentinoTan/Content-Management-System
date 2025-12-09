@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
-  fetch('http://localhost:3000/firebase-config')
+  fetch('/firebase-config')
     .then(response => response.json())
     .then(firebaseConfig => {
       // Initialize Firebase
@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const loadImages = () => {
-        fetch('http://localhost:3000/api/images')
+        fetch('/api/images')
           .then(response => response.json())
           .then(images => {
             imageGallery.innerHTML = '';
@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const loadImagesForModal = () => {
-        fetch('http://localhost:3000/api/images')
+        fetch('/api/images')
           .then(response => response.json())
           .then(images => {
             modalImageGallery.innerHTML = '';
@@ -159,7 +159,7 @@ document.addEventListener('DOMContentLoaded', () => {
       });
 
       const loadSessions = () => {
-        fetch('http://localhost:3000/api/sessions')
+        fetch('/api/sessions')
           .then(response => response.json())
           .then(sessions => {
             sessionsList.innerHTML = '';
@@ -184,7 +184,7 @@ document.addEventListener('DOMContentLoaded', () => {
       sessionsList.addEventListener('click', (e) => {
         if (e.target.classList.contains('details-btn')) {
           const sessionId = e.target.dataset.sessionId;
-          fetch('http://localhost:3000/api/sessions')
+          fetch('/api/sessions')
             .then(response => response.json())
             .then(sessions => {
               const session = sessions[sessionId];
@@ -216,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
           (error) => console.error('Upload failed:', error),
           () => {
             task.snapshot.ref.getDownloadURL().then((downloadURL) => {
-              fetch('http://localhost:3000/api/images', {
+              fetch('/api/images', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ url: downloadURL }),
@@ -265,7 +265,7 @@ document.addEventListener('DOMContentLoaded', () => {
           images: imagesData,
         };
 
-        fetch('http://localhost:3000/api/sessions', {
+        fetch('/api/sessions', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(sessionData),
@@ -384,7 +384,7 @@ document.addEventListener('DOMContentLoaded', () => {
       };
 
       const loadPlayerAnalytics = () => {
-        fetch('http://localhost:3000/api/player-analytics')
+        fetch('/api/player-analytics')
           .then(response => response.json())
           .then(data => {
             destroyCharts();

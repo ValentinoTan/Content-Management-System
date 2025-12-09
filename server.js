@@ -1,5 +1,5 @@
 const path = require('path');
-require('dotenv').config({ path: path.join(__dirname, '.env') });
+require('dotenv').config();
 const express = require('express');
 const admin = require('firebase-admin');
 const cors = require('cors');
@@ -33,8 +33,8 @@ const db = admin.database();
 // Middleware to parse JSON bodies
 app.use(express.json());
 
-// Serve static files from the frontend directory
-app.use(express.static(path.join(__dirname, '../frontend')));
+// Serve static files from the public directory
+app.use(express.static(path.join(__dirname, 'public')));
 
 // API routes
 const apiRouter = express.Router();
@@ -207,7 +207,7 @@ app.get('/firebase-config', (req, res) => {
 
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+    res.sendFile(path.join(__dirname, 'public/index.html'));
 });
 
 
