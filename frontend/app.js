@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 sessionElement.innerHTML = `
                   <div>
                     <h3 class="text-xl font-bold">${session.sessionName}</h3>
-                    <p class="text-sm text-gray-500">Created at: ${new Date(session.createdAt).toLocaleString()}</p>
+                    <p class="text-sm text-gray-500">Created at: ${new Date(session.createdAt).toLocaleDateString()}</p>
                   </div>
                   <button class="details-btn bg-purple-500 hover:bg-purple-700 text-white font-bold py-2 px-4 rounded" data-session-id="${sessionId}">Details</button>
                 `;
