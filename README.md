@@ -15,34 +15,37 @@ This is a simple content management system (CMS) for managing images for a Unity
     cd your-repo-name
     ```
 
-2.  **Install backend dependencies:**
+2.  **Install dependencies:**
     ```bash
-    cd backend
     npm install
     ```
 
-3.  **Create a `.env` file in the `backend` directory.**
-    *   Copy the contents of `.env.example` into a new file named `.env`.
-    *   Update the values in the `.env` file with your Firebase project's credentials.
+3.  **Configure Environment Variables:**
+    *   Create a `.env` file in the root directory.
+    *   Add your Firebase configuration variables (see `HOSTINGER_DEPLOY.md` or source code for required variables like `FIREBASE_DATABASE_URL`, `FIREBASE_STORAGE_BUCKET`, etc.).
 
-4.  **Create a `serviceAccountKey.json` file in the `backend` directory.**
-    *   Go to your Firebase project settings, then to the "Service accounts" tab.
-    *   Click "Generate new private key" to download the JSON file.
-    *   Rename the downloaded file to `serviceAccountKey.json` and place it in the `backend` directory.
+4.  **Service Account Key (Optional/Alternative):**
+    *   If you prefer using a service account key file instead of environment variables for credentials:
+        *   Go to your Firebase project settings -> "Service accounts" tab.
+        *   Generate a new private key.
+        *   Save the file as `serviceAccountKey.json` in the **root** directory.
+    *   Alternatively, you can set the `FIREBASE_SERVICE_ACCOUNT` environment variable with the JSON content of the key.
 
-## Running the application
+## Running the application locally
 
-1.  **Start the backend server:**
+1.  **Start the server:**
     ```bash
-    cd backend
     npm start
     ```
 
-2.  **Open the application in your browser:**
+2.  **Open the application:**
     *   Navigate to `http://localhost:3000` in your web browser.
+
+## Deployment
+
+See [HOSTINGER_DEPLOY.md](HOSTINGER_DEPLOY.md) for instructions on how to deploy to Hostinger.
 
 ## How it works
 
-*   The backend is an Express.js server that serves the frontend files and provides API endpoints to get and save image URLs to Firebase RTDB.
-*   The frontend is a single HTML page styled with Tailwind CSS via a CDN, with JavaScript to handle image uploads to Firebase Storage and communicate with the backend API.
-*   The Unity program can fetch the image URLs from the `/api/images` endpoint.
+*   The backend is an Express.js server (`server.js`) that serves the frontend files from the `public/` directory and provides API endpoints.
+*   The frontend uses Tailwind CSS and communicates with the backend API via relative paths.
