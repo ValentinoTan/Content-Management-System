@@ -157,14 +157,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const existingField = document.getElementById(`desc-div-${currentPlaceholderId}`);
             if (existingField) existingField.remove();
 
-            const descriptionField = document.createElement('div');
-            descriptionField.id = `desc-div-${currentPlaceholderId}`;
-            descriptionField.innerHTML = `
+            if (currentPlaceholderId !== 'game-over') {
+                const descriptionField = document.createElement('div');
+                descriptionField.id = `desc-div-${currentPlaceholderId}`;
+                descriptionField.innerHTML = `
             <label for="desc-input-${currentPlaceholderId}" class="block text-gray-700 text-sm font-bold mt-2 mb-1">Description for ${currentPlaceholderId}:</label>
             <input type="text" id="desc-input-${currentPlaceholderId}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
             <p class="text-xs text-gray-500 mt-1">Recommended maximum 400 letters.</p>
           `;
-            imageDescriptionFields.appendChild(descriptionField);
+                imageDescriptionFields.appendChild(descriptionField);
+            }
 
             closeModal();
         }
@@ -264,10 +266,17 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!placeholder.dataset.imageUrl) {
                 allPlaceholdersFilled = false;
             } else {
-                const descriptionInput = document.getElementById(`desc-input-${placeholderId}`);
+                let description = '';
+                if (placeholderId === 'game-over') {
+                    description = '-';
+                } else {
+                    const descriptionInput = document.getElementById(`desc-input-${placeholderId}`);
+                    description = descriptionInput ? descriptionInput.value : '';
+                }
+
                 const imageData = {
                     url: placeholder.dataset.imageUrl,
-                    description: descriptionInput ? descriptionInput.value : '',
+                    description: description,
                     clickCount: 0 // Initialize click count
                 };
 
