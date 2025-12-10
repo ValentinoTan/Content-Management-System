@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    const filterAndRenderDashboard = () => {
+    const filterPlayerTable = () => {
         const selectedSchool = schoolFilter.value;
 
         if (selectedSchool) {
@@ -445,69 +445,40 @@ document.addEventListener('DOMContentLoaded', () => {
             allPlayers = [...fullPlayerData];
         }
 
-        // Calculate Stats
-        const totalUniquePlayers = allPlayers.length;
-        let totalPlays = 0;
-        let returningPlayers = 0;
-        let highestPlayCount = 0;
+        // Apply current sort if exists
+        if (currentSort.column) {
+            // Re-use logic from sortPlayers but just the sorting part?
+            // Easier to just let sortPlayers trigger or duplicate the sort logic.
+            // Since sortPlayers sorts `allPlayers` in place, we can just call it if we want,
+            // but sortPlayers toggles direction.
+            // For simplicity, let's just sort it if a sort is active.
+             allPlayers.sort((a, b) => {
+                let valA = a[currentSort.column];
+                let valB = b[currentSort.column];
 
-        allPlayers.forEach(player => {
-            totalPlays += player.playCount;
-            if (player.playCount > 1) {
-                returningPlayers += 1;
-            }
-            if (player.playCount > highestPlayCount) {
-                highestPlayCount = player.playCount;
-            }
-        });
+                if (currentSort.column === 'playerScore' || currentSort.column === 'playCount') {
+                    valA = Number(valA);
+                    valB = Number(valB);
+                }
 
-        const returnRate = totalUniquePlayers > 0 ? (returningPlayers / totalUniquePlayers) * 100 : 0;
-        const averagePlays = totalUniquePlayers > 0 ? (totalPlays / totalUniquePlayers) : 0;
+                if (typeof valA === 'string') {
+                    valA = valA.toLowerCase();
+                    valB = valB.toLowerCase();
+                }
 
-        // Data for Charts
-        const playFrequency = {
-            '1': 0,
-            '2-3': 0,
-            '4-5': 0,
-            '6+': 0
-        };
-        allPlayers.forEach(player => {
-            if (player.playCount === 1) playFrequency['1']++;
-            else if (player.playCount >= 2 && player.playCount <= 3) playFrequency['2-3']++;
-            else if (player.playCount >= 4 && player.playCount <= 5) playFrequency['4-5']++;
-            else if (player.playCount >= 6) playFrequency['6+']++;
-        });
-
-        const schoolData = {};
-        allPlayers.forEach(player => {
-            const school = player.schoolName || 'Unknown';
-            if (!schoolData[school]) {
-                schoolData[school] = {
-                    uniquePlayers: 0,
-                    totalPlays: 0
-                };
-            }
-            schoolData[school].uniquePlayers++;
-            schoolData[school].totalPlays += player.playCount;
-        });
-
-        // Update UI
-        destroyCharts();
-
-        totalPlayersEl.textContent = totalUniquePlayers;
-        returnRateEl.textContent = `${returnRate.toFixed(2)}%`;
-        totalPlaysEl.textContent = totalPlays;
-        averagePlaysEl.textContent = averagePlays.toFixed(2);
-        highestPlayCountEl.textContent = highestPlayCount;
+                if (valA < valB) {
+                    return currentSort.direction === 'asc' ? -1 : 1;
+                }
+                if (valA > valB) {
+                    return currentSort.direction === 'asc' ? 1 : -1;
+                }
+                return 0;
+            });
+        }
 
         currentPage = 1;
         displayPlayerPage(currentPage);
         updatePaginationControls();
-
-        // Render charts
-        renderPlayFrequencyChart(playFrequency);
-        renderSchoolEngagementChart(schoolData);
-        renderSchoolDistributionChart(schoolData);
     };
 
     const loadPlayerAnalytics = async () => {
@@ -532,6 +503,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
             }
 
+            const totalPlays = allPlays.length;
+
             const uniquePlayers = {};
             allPlays.forEach(play => {
                 if (!uniquePlayers[play.phoneNumber]) {
@@ -546,8 +519,65 @@ document.addEventListener('DOMContentLoaded', () => {
             });
 
             fullPlayerData = Object.values(uniquePlayers);
+            const totalUniquePlayers = fullPlayerData.length;
+
+            let returningPlayers = 0;
+            let highestPlayCount = 0;
+            fullPlayerData.forEach(player => {
+                if (player.playCount > 1) {
+                    returningPlayers += 1;
+                }
+                if (player.playCount > highestPlayCount) {
+                    highestPlayCount = player.playCount;
+                }
+            });
+
+            const returnRate = totalUniquePlayers > 0 ? (returningPlayers / totalUniquePlayers) * 100 : 0;
+            const averagePlays = totalUniquePlayers > 0 ? (totalPlays / totalUniquePlayers) : 0;
+
+             // Data for Player Play Frequency Chart
+            const playFrequency = {
+                '1': 0,
+                '2-3': 0,
+                '4-5': 0,
+                '6+': 0
+            };
+            fullPlayerData.forEach(player => {
+                if (player.playCount === 1) playFrequency['1']++;
+                else if (player.playCount >= 2 && player.playCount <= 3) playFrequency['2-3']++;
+                else if (player.playCount >= 4 && player.playCount <= 5) playFrequency['4-5']++;
+                else if (player.playCount >= 6) playFrequency['6+']++;
+            });
+
+            // Data for School-based charts
+            const schoolData = {};
+            fullPlayerData.forEach(player => {
+                const school = player.schoolName || 'Unknown';
+                if (!schoolData[school]) {
+                    schoolData[school] = {
+                        uniquePlayers: 0,
+                        totalPlays: 0
+                    };
+                }
+                schoolData[school].uniquePlayers++;
+                schoolData[school].totalPlays += player.playCount;
+            });
+
+             // Update UI Stats
+            totalPlayersEl.textContent = totalUniquePlayers;
+            returnRateEl.textContent = `${returnRate.toFixed(2)}%`;
+            totalPlaysEl.textContent = totalPlays;
+            averagePlaysEl.textContent = averagePlays.toFixed(2);
+            highestPlayCountEl.textContent = highestPlayCount;
+
+            // Render charts
+            destroyCharts();
+            renderPlayFrequencyChart(playFrequency);
+            renderSchoolEngagementChart(schoolData);
+            renderSchoolDistributionChart(schoolData);
+
             populateSchoolFilter(fullPlayerData);
-            filterAndRenderDashboard();
+            filterPlayerTable();
 
         } catch (error) {
             console.error('Error fetching player analytics:', error);
@@ -688,7 +718,7 @@ document.addEventListener('DOMContentLoaded', () => {
         loadPlayerAnalytics();
     });
 
-    schoolFilter.addEventListener('change', filterAndRenderDashboard);
+    schoolFilter.addEventListener('change', filterPlayerTable);
 
     // Initial load
     showView(uploadView);

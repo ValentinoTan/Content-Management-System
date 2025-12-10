@@ -46,15 +46,7 @@
     </div>
 
     <div id="dashboard-view" class="hidden">
-      <div class="flex justify-between items-center mb-4">
-        <h2 class="text-2xl font-semibold">Dashboard</h2>
-        <div>
-          <label for="school-filter" class="mr-2 font-semibold">Filter by School:</label>
-          <select id="school-filter" class="border rounded p-2">
-            <option value="">All Schools</option>
-          </select>
-        </div>
-      </div>
+      <h2 class="text-2xl font-semibold mb-2">Dashboard</h2>
 
       <h3 class="text-xl font-semibold mb-4 border-b pb-2">Summary</h3>
       <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
@@ -96,7 +88,15 @@
         </div>
       </div>
 
-      <h3 class="text-xl font-semibold mt-8 mb-4 border-b pb-2">Player Data</h3>
+      <div class="flex justify-between items-center mt-8 mb-4 border-b pb-2">
+        <h3 class="text-xl font-semibold">Player Data</h3>
+        <div>
+          <label for="school-filter" class="mr-2 font-semibold text-sm">Filter by School:</label>
+          <select id="school-filter" class="border rounded p-1 text-sm">
+            <option value="">All Schools</option>
+          </select>
+        </div>
+      </div>
       <div class="mt-8">
         <table class="min-w-full bg-white">
           <thead class="bg-gray-800 text-white">
