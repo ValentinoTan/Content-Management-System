@@ -162,6 +162,7 @@ document.addEventListener('DOMContentLoaded', () => {
             descriptionField.innerHTML = `
             <label for="desc-input-${currentPlaceholderId}" class="block text-gray-700 text-sm font-bold mt-2 mb-1">Description for ${currentPlaceholderId}:</label>
             <input type="text" id="desc-input-${currentPlaceholderId}" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            <p class="text-xs text-gray-500 mt-1">Recommended maximum 400 letters.</p>
           `;
             imageDescriptionFields.appendChild(descriptionField);
 
