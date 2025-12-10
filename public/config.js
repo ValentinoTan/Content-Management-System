@@ -1,12 +1,12 @@
 // Firebase Configuration
 // Replace the values below with your actual Firebase project configuration
 window.firebaseConfig = {
-    apiKey: "YOUR_API_KEY",
-    authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-    databaseURL: "https://YOUR_PROJECT_ID.firebaseio.com",
-    projectId: "YOUR_PROJECT_ID",
-    storageBucket: "YOUR_PROJECT_ID.appspot.com",
-    messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
-    appId: "YOUR_APP_ID",
-    measurementId: "YOUR_MEASUREMENT_ID"
+    apiKey: "AIzaSyAoRkAmX24YxKjgALcW5jtndA-lwkooPyg",
+    authDomain: "ids-fps.firebaseapp.com",
+    databaseURL: "https://ids-fps-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "ids-fps",
+    storageBucket: "ids-fps.firebasestorage.app",
+    messagingSenderId: "504989185964",
+    appId: "1:504989185964:web:27a82f06b16d23c0f22c09",
+    measurementId: "G-K9BDB4KMYK"
 };
