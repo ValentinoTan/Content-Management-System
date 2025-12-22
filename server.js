@@ -56,7 +56,6 @@ apiRouter.post('/images', async (req, res) => {
   }
 
   try {
-    // 1. Save to Firebase Database (existing logic)
     const newImageRef = db.ref('images').push();
     await newImageRef.set({ url });
 
