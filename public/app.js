@@ -205,14 +205,38 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then((snapshot) => {
                     const session = snapshot.val();
                     let totalClicks = 0;
+                    let detailsHTML = '<div class="grid grid-cols-2 gap-4">';
+
                     if (session.images.home_screen) {
-                        totalClicks += session.images.home_screen.reduce((acc, img) => acc + (img.clickCount || 0), 0);
+                        session.images.home_screen.forEach((img, index) => {
+                            const count = img.clickCount || 0;
+                            totalClicks += count;
+                            detailsHTML += `
+                                <div class="text-center p-2 border rounded">
+                                    <p class="font-bold text-sm mb-1">Home ${index + 1}</p>
+                                    <img src="${img.url}" class="w-full h-24 object-cover rounded mb-1 mx-auto">
+                                    <p class="text-sm">Clicks: ${count}</p>
+                                </div>`;
+                        });
                     }
+
                     if (session.images.game_over_screen) {
-                        totalClicks += session.images.game_over_screen.clickCount || 0;
+                        const img = session.images.game_over_screen;
+                        const count = img.clickCount || 0;
+                        totalClicks += count;
+                        detailsHTML += `
+                            <div class="text-center p-2 border rounded">
+                                <p class="font-bold text-sm mb-1">Game Over</p>
+                                <img src="${img.url}" class="w-full h-24 object-cover rounded mb-1 mx-auto">
+                                <p class="text-sm">Clicks: ${count}</p>
+                            </div>`;
                     }
+
+                    detailsHTML += '</div>';
+                    detailsHTML += `<div class="mt-4 text-center border-t pt-4"><p class="text-3xl font-bold text-purple-600">${totalClicks}</p><p class="text-gray-600">Total Cumulative Clicks</p></div>`;
+
                     detailsModalTitle.textContent = `Details for ${session.sessionName}`;
-                    detailsModalContent.innerHTML = `<p class="text-2xl">${totalClicks}</p><p>Total Clicks</p>`;
+                    detailsModalContent.innerHTML = detailsHTML;
                     sessionDetailsModal.classList.remove('hidden');
                 })
                 .catch((error) => {
